@@ -7,31 +7,6 @@ use std::io::Write;
 use rand::rngs::ThreadRng;
 use rand::seq::SliceRandom;
 
-struct InvalidLengthError {
-    answer: usize,
-    guess: usize,
-}
-
-impl fmt::Display for InvalidLengthError {
-    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        write!(
-            f,
-            "invalid length. answer={}, guess={}",
-            self.answer, self.guess
-        )
-    }
-}
-
-struct InvalidDigitError {
-    char: char,
-}
-
-impl fmt::Display for InvalidDigitError {
-    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        write!(f, "invalid digit. char={}", self.char)
-    }
-}
-
 struct CheckResult {
     hit: u8,
     blow: u8,
@@ -61,15 +36,16 @@ impl Answer {
         };
     }
 
-    fn check(&self, guess: Vec<u8>) -> Result<CheckResult, InvalidLengthError> {
+    fn check(&self, guess: Vec<u8>) -> Result<CheckResult, String> {
         let mut hit = 0;
         let mut blow = 0;
 
         if self.answer.len() != guess.len() {
-            return Err(InvalidLengthError {
-                answer: self.answer.len(),
-                guess: guess.len(),
-            });
+            return Err(format!(
+                "長さが間違っています。ans={}, guess={}",
+                self.answer.len(),
+                guess.len()
+            ));
         }
 
         for (idx, &val) in guess.iter().enumerate() {
@@ -94,13 +70,13 @@ struct Guess {
 }
 
 impl Guess {
-    fn new(guess: String) -> Result<Self, InvalidDigitError> {
+    fn new(guess: String) -> Result<Self, String> {
         let mut guess_vec = vec![];
 
         for c in guess.trim().chars() {
             match c.to_digit(10) {
                 Some(d) => guess_vec.push(d as u8),
-                None => return Err(InvalidDigitError { char: c }),
+                None => return Err(format!("数字として解釈できない文字があります。c={}", c)),
             };
         }
 
