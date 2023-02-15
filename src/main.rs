@@ -1,82 +1,12 @@
 extern crate rand;
 
-use std::fmt;
+mod check_result;
+mod code;
+
+use check_result::CheckResult;
+use code::Code;
 use std::io;
 use std::io::Write;
-
-use rand::rngs::ThreadRng;
-use rand::seq::SliceRandom;
-
-pub struct Code {
-    pub code: Vec<u8>,
-}
-
-pub struct CheckResult {
-    hit: u8,
-    blow: u8,
-}
-
-impl CheckResult {
-    pub fn check(answer: &Code, guess: &Code) -> Result<Self, String> {
-        let mut hit = 0;
-        let mut blow = 0;
-
-        if answer.code.len() != guess.code.len() {
-            return Err(format!(
-                "長さが間違っています。ans={}, guess={}",
-                answer.code.len(),
-                guess.code.len()
-            ));
-        }
-
-        for (idx, &val) in guess.code.iter().enumerate() {
-            if let Some(ans_idx) = answer.code.iter().position(|&ans| ans == val) {
-                if ans_idx == idx {
-                    hit += 1;
-                } else {
-                    blow += 1;
-                }
-            }
-        }
-
-        Ok(CheckResult {
-            hit: hit,
-            blow: blow,
-        })
-    }
-
-    pub fn correct(&self) -> bool {
-        self.hit == 4 && self.blow == 0
-    }
-}
-
-impl fmt::Display for CheckResult {
-    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        write!(f, "Result: {}hit, {}blow", self.hit, self.blow)
-    }
-}
-
-impl Code {
-    pub fn new(rng: &mut ThreadRng) -> Self {
-        let choices = (0..10).collect::<Vec<u8>>();
-        return Self {
-            code: choices.choose_multiple(rng, 4).cloned().collect(),
-        };
-    }
-
-    pub fn from_string(s: String) -> Result<Self, String> {
-        let mut vec = vec![];
-
-        for c in s.trim().chars() {
-            match c.to_digit(10) {
-                Some(d) => vec.push(d as u8),
-                None => return Err(format!("数字として解釈できない文字があります。c={}", c)),
-            };
-        }
-
-        Ok(Self { code: vec })
-    }
-}
 
 fn main() {
     let mut rng = rand::thread_rng();
