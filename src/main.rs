@@ -7,73 +7,30 @@ use std::io::Write;
 use rand::rngs::ThreadRng;
 use rand::seq::SliceRandom;
 
-struct InvalidLengthError {
-    answer: usize,
-    guess: usize,
+pub struct Code {
+    pub code: Vec<u8>,
 }
 
-impl fmt::Display for InvalidLengthError {
-    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        write!(
-            f,
-            "invalid length. answer={}, guess={}",
-            self.answer, self.guess
-        )
-    }
-}
-
-struct InvalidDigitError {
-    char: char,
-}
-
-impl fmt::Display for InvalidDigitError {
-    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        write!(f, "invalid digit. char={}", self.char)
-    }
-}
-
-struct CheckResult {
+pub struct CheckResult {
     hit: u8,
     blow: u8,
 }
 
 impl CheckResult {
-    fn correct(&self) -> bool {
-        self.hit == 4 && self.blow == 0
-    }
-}
-
-impl fmt::Display for CheckResult {
-    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        write!(f, "Result: {}hit, {}blow", self.hit, self.blow)
-    }
-}
-
-struct Answer {
-    answer: Vec<u8>,
-}
-
-impl Answer {
-    fn new(rng: &mut ThreadRng) -> Self {
-        let choices = (0..10).collect::<Vec<u8>>();
-        return Self {
-            answer: choices.choose_multiple(rng, 4).cloned().collect(),
-        };
-    }
-
-    fn check(&self, guess: Vec<u8>) -> Result<CheckResult, InvalidLengthError> {
+    pub fn check(answer: &Code, guess: &Code) -> Result<Self, String> {
         let mut hit = 0;
         let mut blow = 0;
 
-        if self.answer.len() != guess.len() {
-            return Err(InvalidLengthError {
-                answer: self.answer.len(),
-                guess: guess.len(),
-            });
+        if answer.code.len() != guess.code.len() {
+            return Err(format!(
+                "長さが間違っています。ans={}, guess={}",
+                answer.code.len(),
+                guess.code.len()
+            ));
         }
 
-        for (idx, &val) in guess.iter().enumerate() {
-            if let Some(ans_idx) = self.answer.iter().position(|&ans| ans == val) {
+        for (idx, &val) in guess.code.iter().enumerate() {
+            if let Some(ans_idx) = answer.code.iter().position(|&ans| ans == val) {
                 if ans_idx == idx {
                     hit += 1;
                 } else {
@@ -87,30 +44,43 @@ impl Answer {
             blow: blow,
         })
     }
+
+    pub fn correct(&self) -> bool {
+        self.hit == 4 && self.blow == 0
+    }
 }
 
-struct Guess {
-    guess: Vec<u8>,
+impl fmt::Display for CheckResult {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        write!(f, "Result: {}hit, {}blow", self.hit, self.blow)
+    }
 }
 
-impl Guess {
-    fn new(guess: String) -> Result<Self, InvalidDigitError> {
-        let mut guess_vec = vec![];
+impl Code {
+    pub fn new(rng: &mut ThreadRng) -> Self {
+        let choices = (0..10).collect::<Vec<u8>>();
+        return Self {
+            code: choices.choose_multiple(rng, 4).cloned().collect(),
+        };
+    }
 
-        for c in guess.trim().chars() {
+    pub fn from_string(s: String) -> Result<Self, String> {
+        let mut vec = vec![];
+
+        for c in s.trim().chars() {
             match c.to_digit(10) {
-                Some(d) => guess_vec.push(d as u8),
-                None => return Err(InvalidDigitError { char: c }),
+                Some(d) => vec.push(d as u8),
+                None => return Err(format!("数字として解釈できない文字があります。c={}", c)),
             };
         }
 
-        Ok(Guess { guess: guess_vec })
+        Ok(Self { code: vec })
     }
 }
 
 fn main() {
     let mut rng = rand::thread_rng();
-    let answer = Answer::new(&mut rng);
+    let answer = Code::new(&mut rng);
 
     loop {
         print!("4桁の数字を入力してください: ");
@@ -120,20 +90,18 @@ fn main() {
             .read_line(&mut guess)
             .expect("入力エラー。read_line()で失敗しました。");
 
-        let guess = match Guess::new(guess) {
+        let guess = match Code::from_string(guess) {
             Ok(guess) => guess,
             Err(e) => {
-                println!("{}", e);
-                println!("もう一度入力してください。");
+                println!("{}\nもう一度入力してください。", e);
                 continue;
             }
         };
 
-        let result = match answer.check(guess.guess) {
+        let result = match CheckResult::check(&answer, &guess) {
             Ok(result) => result,
             Err(e) => {
-                println!("{}", e);
-                println!("もう一度入力してください。");
+                println!("{}\nもう一度入力してください。", e);
                 continue;
             }
         };
