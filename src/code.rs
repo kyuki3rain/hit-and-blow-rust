@@ -1,16 +1,13 @@
 use rand::rngs::ThreadRng;
 use rand::seq::SliceRandom;
 
-pub struct Code {
-    pub code: Vec<u8>,
-}
+pub struct Code(pub Vec<u8>);
 
 impl Code {
     pub fn new(rng: &mut ThreadRng) -> Self {
         let choices = (0..10).collect::<Vec<u8>>();
-        return Self {
-            code: choices.choose_multiple(rng, 4).cloned().collect(),
-        };
+
+        Code(choices.choose_multiple(rng, 4).cloned().collect())
     }
 
     pub fn from_string(s: String) -> Result<Self, String> {
@@ -23,6 +20,6 @@ impl Code {
             };
         }
 
-        Ok(Self { code: vec })
+        Ok(Code(vec))
     }
 }
