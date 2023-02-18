@@ -1,6 +1,6 @@
-name: Rust Continuous-Integration
+name: Rust lint & test
 
-on: [push, pull_request]
+on: pull_request
 
 jobs:
   lint:
@@ -22,7 +22,7 @@ jobs:
       run: cargo clippy -- -D warnings
 
   test:
-    name: Test Suite
+    name: Test
     runs-on: ubuntu-latest
     steps:
     - name: Checkout Crate
