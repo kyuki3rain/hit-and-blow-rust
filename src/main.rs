@@ -10,7 +10,7 @@ use std::io::Write;
 
 fn main() {
     let mut rng = rand::thread_rng();
-    let answer = Code::new(&mut rng);
+    let answer = Code::from_rand(&mut rng);
 
     loop {
         print!("4桁の数字を入力してください: ");
