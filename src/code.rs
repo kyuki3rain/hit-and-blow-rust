@@ -1,22 +1,25 @@
-use std::collections::HashMap;
-
-use rand::rngs::ThreadRng;
 use rand::seq::SliceRandom;
+use std::collections::HashMap;
 
 #[derive(Debug, PartialEq, Eq)]
 pub struct Code(pub HashMap<u8, usize>);
 
 impl Code {
-    pub fn from_rand(rng: &mut ThreadRng) -> Self {
+    pub fn from_rand(length: usize) -> Result<Self, String> {
+        if length > 10 {
+            return Err(format!("長さは10以下である必要があります。l={}", length));
+        }
+
+        let mut rng = rand::thread_rng();
         let choices = (0..10).collect::<Vec<u8>>();
 
-        Code(HashMap::from_iter(
+        Ok(Code(HashMap::from_iter(
             choices
-                .choose_multiple(rng, 4)
+                .choose_multiple(&mut rng, length)
                 .cloned()
                 .enumerate()
                 .map(|(i, d)| (d, i)),
-        ))
+        )))
     }
 
     pub fn from_string(s: String) -> Result<Self, String> {
@@ -50,10 +53,20 @@ mod tests {
 
     #[test]
     fn from_rand() {
-        let mut rng = rand::thread_rng();
-        let code = Code::from_rand(&mut rng);
+        let code = Code::from_rand(4).unwrap();
 
         assert_eq!(code.0.len(), 4);
+
+        let mut set = HashSet::new();
+
+        for (d, i) in &code.0 {
+            assert!(*d < 10);
+            assert!(set.insert(*i));
+        }
+
+        let code = Code::from_rand(8).unwrap();
+
+        assert_eq!(code.0.len(), 8);
 
         let mut set = HashSet::new();
 

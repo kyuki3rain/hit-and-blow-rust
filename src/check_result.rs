@@ -3,8 +3,8 @@ use std::fmt;
 
 #[derive(Debug, PartialEq, Eq)]
 pub struct CheckResult {
-    hit: u8,
-    blow: u8,
+    hit: usize,
+    blow: usize,
 }
 
 impl CheckResult {
@@ -33,8 +33,8 @@ impl CheckResult {
         Ok(CheckResult { hit, blow })
     }
 
-    pub fn correct(&self) -> bool {
-        self.hit == 4 && self.blow == 0
+    pub fn correct(&self, len: usize) -> bool {
+        self.hit == len && self.blow == 0
     }
 }
 
@@ -76,14 +76,24 @@ mod tests {
             CheckResult::check(&answer, &guess),
             Err("長さが間違っています。ans=4, guess=5".to_string())
         );
+
+        let answer = Code::from_string("01234567".to_string()).unwrap();
+        let guess = Code::from_string("01234567".to_string()).unwrap();
+        assert_eq!(
+            CheckResult::check(&answer, &guess),
+            Ok(CheckResult { hit: 8, blow: 0 })
+        );
     }
 
     #[test]
     fn correct() {
         let result = CheckResult { hit: 4, blow: 0 };
-        assert!(result.correct());
+        assert!(result.correct(4));
 
         let result = CheckResult { hit: 1, blow: 0 };
-        assert!(!result.correct());
+        assert!(!result.correct(4));
+
+        let result = CheckResult { hit: 8, blow: 0 };
+        assert!(result.correct(8));
     }
 }

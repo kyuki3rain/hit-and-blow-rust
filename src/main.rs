@@ -9,13 +9,19 @@ use std::io;
 use std::io::Write;
 
 fn main() {
-    let mut rng = rand::thread_rng();
-    let answer = Code::from_rand(&mut rng);
+    let len: usize = 10;
+    let answer = match Code::from_rand(len) {
+        Ok(code) => code,
+        Err(e) => {
+            println!("{}", e);
+            return;
+        }
+    };
 
     let mut counter = 0;
 
     loop {
-        print!("4桁の数字を入力してください: ");
+        print!("{}桁の数字を入力してください: ", len);
         io::stdout().flush().unwrap();
 
         let mut guess = String::new();
@@ -42,7 +48,7 @@ fn main() {
         counter += 1;
         println!("{}", result);
 
-        if result.correct() {
+        if result.correct(len) {
             println!("Congratulations!");
             println!("Your score: {}", counter);
             break;
