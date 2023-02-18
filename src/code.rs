@@ -11,7 +11,7 @@ impl Code {
         }
 
         let mut rng = rand::thread_rng();
-        let choices = (0..10).collect::<Vec<u8>>();
+        let choices: Vec<u8> = (0..10).collect();
 
         Ok(Code(HashMap::from_iter(
             choices
@@ -27,12 +27,11 @@ impl Code {
 
         for (i, c) in s.trim().chars().enumerate() {
             let d = match c.to_digit(10) {
-                Some(d) => d,
+                Some(d) => d as u8,
                 None => return Err(format!("数字として解釈できない文字があります。c={}", c)),
             };
 
-            let res = code.insert(d as u8, i);
-            if let Some(j) = res {
+            if let Some(j) = code.insert(d, i) {
                 return Err(format!(
                     "{}つ目と{}つ目の数字が重複しています。d={}",
                     j + 1,
