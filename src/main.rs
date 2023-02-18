@@ -12,9 +12,12 @@ fn main() {
     let mut rng = rand::thread_rng();
     let answer = Code::from_rand(&mut rng);
 
+    let mut counter = 0;
+
     loop {
         print!("4桁の数字を入力してください: ");
         io::stdout().flush().unwrap();
+
         let mut guess = String::new();
         io::stdin()
             .read_line(&mut guess)
@@ -36,10 +39,12 @@ fn main() {
             }
         };
 
+        counter += 1;
         println!("{}", result);
 
         if result.correct() {
-            println!("Congratulations!!");
+            println!("Congratulations!");
+            println!("Your score: {}", counter);
             break;
         }
     }
