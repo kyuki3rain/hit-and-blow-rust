@@ -5,9 +5,9 @@ use std::collections::HashMap;
 pub struct Code(pub HashMap<u8, usize>);
 
 impl Code {
-    pub fn from_rand(length: usize) -> Result<Self, String> {
-        if length > 10 {
-            return Err(format!("長さは10以下である必要があります。l={}", length));
+    pub fn from_rand(len: usize) -> Result<Self, String> {
+        if len > 10 {
+            return Err(format!("長さは10以下である必要があります。l={}", len));
         }
 
         let mut rng = rand::thread_rng();
@@ -15,7 +15,7 @@ impl Code {
 
         Ok(Code(HashMap::from_iter(
             choices
-                .choose_multiple(&mut rng, length)
+                .choose_multiple(&mut rng, len)
                 .cloned()
                 .enumerate()
                 .map(|(i, d)| (d, i)),
