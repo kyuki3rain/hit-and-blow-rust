@@ -21,8 +21,8 @@ impl CheckResult {
         }
 
         for (val, i) in guess.0.iter() {
-            if let Some(ans_idx) = answer.0.get(val) {
-                if ans_idx == i {
+            if let Some(j) = answer.0.get(val) {
+                if i == j {
                     hit += 1;
                 } else {
                     blow += 1;
