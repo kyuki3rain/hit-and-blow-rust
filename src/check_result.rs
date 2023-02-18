@@ -30,10 +30,7 @@ impl CheckResult {
             }
         }
 
-        Ok(CheckResult {
-            hit: hit,
-            blow: blow,
-        })
+        Ok(CheckResult { hit, blow })
     }
 
     pub fn correct(&self) -> bool {
@@ -87,6 +84,6 @@ mod tests {
         assert!(result.correct());
 
         let result = CheckResult { hit: 1, blow: 0 };
-        assert_eq!(result.correct(), false);
+        assert!(!result.correct());
     }
 }
