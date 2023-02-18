@@ -1,34 +1,52 @@
+use std::collections::HashMap;
+
 use rand::rngs::ThreadRng;
 use rand::seq::SliceRandom;
 
 #[derive(Debug, PartialEq, Eq)]
-pub struct Code(pub Vec<u8>);
+pub struct Code(pub HashMap<u8, usize>);
 
 impl Code {
     pub fn from_rand(rng: &mut ThreadRng) -> Self {
         let choices = (0..10).collect::<Vec<u8>>();
+        let code_vec: Vec<(u8, usize)> = choices
+            .choose_multiple(rng, 4)
+            .cloned()
+            .enumerate()
+            .map(|(i, d)| (d, i))
+            .collect();
 
-        Code(choices.choose_multiple(rng, 4).cloned().collect())
+        Code(HashMap::from_iter(code_vec))
     }
 
     pub fn from_string(s: String) -> Result<Self, String> {
-        let mut vec = vec![];
+        let mut map = HashMap::new();
 
-        for c in s.trim().chars() {
-            match c.to_digit(10) {
-                Some(d) => vec.push(d as u8),
+        for (i, c) in s.trim().chars().enumerate() {
+            let d = match c.to_digit(10) {
+                Some(d) => d,
                 None => return Err(format!("数字として解釈できない文字があります。c={}", c)),
             };
+
+            let res = map.insert(d as u8, i);
+            if let Some(j) = res {
+                return Err(format!(
+                    "{}つ目と{}つ目の数字が重複しています。d={}",
+                    j + 1,
+                    i + 1,
+                    d
+                ));
+            }
         }
 
-        Ok(Code(vec))
+        Ok(Code(map))
     }
 }
 
 #[cfg(test)]
 mod tests {
     use super::Code;
-    use std::collections::HashSet;
+    use std::collections::{HashMap, HashSet};
 
     #[test]
     fn from_rand() {
@@ -39,8 +57,8 @@ mod tests {
 
         let mut set = HashSet::new();
 
-        for i in &code.0 {
-            assert!(*i < 10);
+        for (d, i) in &code.0 {
+            assert!(*d < 10);
             assert!(set.insert(*i));
         }
     }
@@ -49,8 +67,14 @@ mod tests {
     fn from_string() {
         assert_eq!(
             Code::from_string("0123".to_string()),
-            Ok(Code(vec![0, 1, 2, 3]))
+            Ok(Code(HashMap::from([(0, 0), (1, 1), (2, 2), (3, 3)])))
         );
+
+        assert_eq!(
+            Code::from_string("0012".to_string()),
+            Err("1つ目と2つ目の数字が重複しています。d=0".to_string())
+        );
+
         assert_eq!(
             Code::from_string("01a3".to_string()),
             Err("数字として解釈できない文字があります。c=a".to_string())

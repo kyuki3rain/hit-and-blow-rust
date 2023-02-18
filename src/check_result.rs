@@ -20,9 +20,9 @@ impl CheckResult {
             ));
         }
 
-        for (idx, &val) in guess.0.iter().enumerate() {
-            if let Some(ans_idx) = answer.0.iter().position(|&ans| ans == val) {
-                if ans_idx == idx {
+        for (val, i) in guess.0.iter() {
+            if let Some(ans_idx) = answer.0.get(val) {
+                if ans_idx == i {
                     hit += 1;
                 } else {
                     blow += 1;
