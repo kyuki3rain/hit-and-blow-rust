@@ -9,18 +9,18 @@ pub struct Code(pub HashMap<u8, usize>);
 impl Code {
     pub fn from_rand(rng: &mut ThreadRng) -> Self {
         let choices = (0..10).collect::<Vec<u8>>();
-        let code_vec: Vec<(u8, usize)> = choices
-            .choose_multiple(rng, 4)
-            .cloned()
-            .enumerate()
-            .map(|(i, d)| (d, i))
-            .collect();
 
-        Code(HashMap::from_iter(code_vec))
+        Code(HashMap::from_iter(
+            choices
+                .choose_multiple(rng, 4)
+                .cloned()
+                .enumerate()
+                .map(|(i, d)| (d, i)),
+        ))
     }
 
     pub fn from_string(s: String) -> Result<Self, String> {
-        let mut map = HashMap::new();
+        let mut code = HashMap::new();
 
         for (i, c) in s.trim().chars().enumerate() {
             let d = match c.to_digit(10) {
@@ -28,7 +28,7 @@ impl Code {
                 None => return Err(format!("数字として解釈できない文字があります。c={}", c)),
             };
 
-            let res = map.insert(d as u8, i);
+            let res = code.insert(d as u8, i);
             if let Some(j) = res {
                 return Err(format!(
                     "{}つ目と{}つ目の数字が重複しています。d={}",
@@ -39,7 +39,7 @@ impl Code {
             }
         }
 
-        Ok(Code(map))
+        Ok(Code(code))
     }
 }
 
