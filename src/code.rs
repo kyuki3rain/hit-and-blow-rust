@@ -1,22 +1,25 @@
-use std::collections::HashMap;
-
-use rand::rngs::ThreadRng;
 use rand::seq::SliceRandom;
+use std::collections::HashMap;
 
 #[derive(Debug, PartialEq, Eq)]
 pub struct Code(pub HashMap<u8, usize>);
 
 impl Code {
-    pub fn from_rand(rng: &mut ThreadRng) -> Self {
-        let choices = (0..10).collect::<Vec<u8>>();
+    pub fn from_rand(len: usize) -> Result<Self, String> {
+        if len > 10 {
+            return Err(format!("長さは10以下である必要があります。l={}", len));
+        }
 
-        Code(HashMap::from_iter(
+        let mut rng = rand::thread_rng();
+        let choices: Vec<u8> = (0..10).collect();
+
+        Ok(Code(HashMap::from_iter(
             choices
-                .choose_multiple(rng, 4)
+                .choose_multiple(&mut rng, len)
                 .cloned()
                 .enumerate()
                 .map(|(i, d)| (d, i)),
-        ))
+        )))
     }
 
     pub fn from_string(s: String) -> Result<Self, String> {
@@ -24,12 +27,11 @@ impl Code {
 
         for (i, c) in s.trim().chars().enumerate() {
             let d = match c.to_digit(10) {
-                Some(d) => d,
+                Some(d) => d as u8,
                 None => return Err(format!("数字として解釈できない文字があります。c={}", c)),
             };
 
-            let res = code.insert(d as u8, i);
-            if let Some(j) = res {
+            if let Some(j) = code.insert(d, i) {
                 return Err(format!(
                     "{}つ目と{}つ目の数字が重複しています。d={}",
                     j + 1,
@@ -50,10 +52,20 @@ mod tests {
 
     #[test]
     fn from_rand() {
-        let mut rng = rand::thread_rng();
-        let code = Code::from_rand(&mut rng);
+        let code = Code::from_rand(4).unwrap();
 
         assert_eq!(code.0.len(), 4);
+
+        let mut set = HashSet::new();
+
+        for (d, i) in &code.0 {
+            assert!(*d < 10);
+            assert!(set.insert(*i));
+        }
+
+        let code = Code::from_rand(8).unwrap();
+
+        assert_eq!(code.0.len(), 8);
 
         let mut set = HashSet::new();
 

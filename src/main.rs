@@ -4,18 +4,34 @@ mod check_result;
 mod code;
 
 use check_result::CheckResult;
+use clap::Parser;
 use code::Code;
 use std::io;
 use std::io::Write;
 
+#[derive(Parser, Debug)]
+#[command(author, version, about, long_about = None)]
+struct Args {
+    /// Number of length of code
+    #[arg(short, long, default_value_t = 4)]
+    length: usize,
+}
+
 fn main() {
-    let mut rng = rand::thread_rng();
-    let answer = Code::from_rand(&mut rng);
+    let args = Args::parse();
+
+    let answer = match Code::from_rand(args.length) {
+        Ok(code) => code,
+        Err(e) => {
+            println!("{}", e);
+            return;
+        }
+    };
 
     let mut counter = 0;
 
     loop {
-        print!("4桁の数字を入力してください: ");
+        print!("{}桁の数字を入力してください: ", args.length);
         io::stdout().flush().unwrap();
 
         let mut guess = String::new();
@@ -42,7 +58,7 @@ fn main() {
         counter += 1;
         println!("{}", result);
 
-        if result.correct() {
+        if result.correct(args.length) {
             println!("Congratulations!");
             println!("Your score: {}", counter);
             break;
