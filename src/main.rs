@@ -15,12 +15,14 @@ struct Args {
     /// Number of length of code
     #[arg(short, long, default_value_t = 4)]
     length: usize,
+    #[arg(short, long, default_value_t = 10)]
+    radix: u8,
 }
 
 fn main() {
     let args = Args::parse();
 
-    let answer = match Code::from_rand(args.length) {
+    let answer = match Code::from_rand(args.length, args.radix) {
         Ok(code) => code,
         Err(e) => {
             println!("{}", e);
@@ -39,7 +41,7 @@ fn main() {
             .read_line(&mut guess)
             .expect("入力エラー。read_line()で失敗しました。");
 
-        let guess = match Code::from_string(guess) {
+        let guess = match Code::from_string(guess, args.radix) {
             Ok(guess) => guess,
             Err(e) => {
                 println!("{}\nもう一度入力してください。", e);

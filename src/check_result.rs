@@ -51,34 +51,34 @@ mod tests {
 
     #[test]
     fn check() {
-        let answer = Code::from_string("0123".to_string()).unwrap();
+        let answer = Code::from_string("0123".to_string(), 10).unwrap();
 
-        let guess = Code::from_string("0123".to_string()).unwrap();
+        let guess = Code::from_string("0123".to_string(), 10).unwrap();
         assert_eq!(
             CheckResult::check(&answer, &guess),
             Ok(CheckResult { hit: 4, blow: 0 })
         );
 
-        let guess = Code::from_string("0369".to_string()).unwrap();
+        let guess = Code::from_string("0369".to_string(), 10).unwrap();
         assert_eq!(
             CheckResult::check(&answer, &guess),
             Ok(CheckResult { hit: 1, blow: 1 })
         );
 
-        let guess = Code::from_string("4567".to_string()).unwrap();
+        let guess = Code::from_string("4567".to_string(), 10).unwrap();
         assert_eq!(
             CheckResult::check(&answer, &guess),
             Ok(CheckResult { hit: 0, blow: 0 })
         );
 
-        let guess = Code::from_string("01234".to_string()).unwrap();
+        let guess = Code::from_string("01234".to_string(), 10).unwrap();
         assert_eq!(
             CheckResult::check(&answer, &guess),
             Err("長さが間違っています。ans=4, guess=5".to_string())
         );
 
-        let answer = Code::from_string("01234567".to_string()).unwrap();
-        let guess = Code::from_string("01234567".to_string()).unwrap();
+        let answer = Code::from_string("01234567".to_string(), 10).unwrap();
+        let guess = Code::from_string("01234567".to_string(), 10).unwrap();
         assert_eq!(
             CheckResult::check(&answer, &guess),
             Ok(CheckResult { hit: 8, blow: 0 })
