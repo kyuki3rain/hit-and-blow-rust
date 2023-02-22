@@ -29,13 +29,7 @@ fn main() {
         }
     };
 
-    let answer = match factory.generate(args.length) {
-        Ok(code) => code,
-        Err(e) => {
-            println!("{}", e);
-            return;
-        }
-    };
+    let answer = factory.generate(args.length);
 
     let mut counter = 0;
 

@@ -46,9 +46,8 @@ impl fmt::Display for CheckResult {
 
 #[cfg(test)]
 mod tests {
-    use crate::code::CodeFactory;
-
     use super::CheckResult;
+    use crate::code::CodeFactory;
 
     #[test]
     fn check() {
