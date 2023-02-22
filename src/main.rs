@@ -5,7 +5,7 @@ mod code;
 
 use check_result::CheckResult;
 use clap::Parser;
-use code::Code;
+use code::CodeFactory;
 use std::io;
 use std::io::Write;
 
@@ -21,8 +21,15 @@ struct Args {
 
 fn main() {
     let args = Args::parse();
+    let factory = match CodeFactory::try_from(args.radix) {
+        Ok(factory) => factory,
+        Err(e) => {
+            println!("{}", e);
+            return;
+        }
+    };
 
-    let answer = match Code::from_rand(args.length, args.radix) {
+    let answer = match factory.generate(args.length) {
         Ok(code) => code,
         Err(e) => {
             println!("{}", e);
@@ -41,7 +48,7 @@ fn main() {
             .read_line(&mut guess)
             .expect("入力エラー。read_line()で失敗しました。");
 
-        let guess = match Code::from_string(guess, args.radix) {
+        let guess = match factory.generate_from_string(guess) {
             Ok(guess) => guess,
             Err(e) => {
                 println!("{}\nもう一度入力してください。", e);
