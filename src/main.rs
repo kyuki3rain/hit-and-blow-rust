@@ -49,8 +49,8 @@ fn main() {
             }
         };
 
-        let result = match answer.diff(&guess) {
-            Ok(result) => result,
+        let (result, is_correct) = match answer.diff(&guess) {
+            Ok(d) => d,
             Err(e) => {
                 println!("{}\nもう一度入力してください。", e);
                 continue;
@@ -60,7 +60,7 @@ fn main() {
         counter += 1;
         println!("{}", result);
 
-        if result.correct(args.length) {
+        if is_correct {
             println!("Congratulations!");
             println!("Your score: {}", counter);
             break;

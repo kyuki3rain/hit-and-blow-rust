@@ -11,7 +11,11 @@ impl Code {
         Self(init)
     }
 
-    pub fn diff(&self, guess: &Code) -> Result<DiffResult, String> {
+    fn len(&self) -> usize {
+        self.0.len()
+    }
+
+    pub fn diff(&self, guess: &Code) -> Result<(DiffResult, bool), String> {
         if self.0.len() != guess.0.len() {
             return Err(format!(
                 "長さが間違っています。ans={}, guess={}",
@@ -32,7 +36,9 @@ impl Code {
             }
         }
 
-        Ok(result)
+        let is_correct = result.correct(self.len());
+
+        Ok((result, is_correct))
     }
 
     #[cfg(test)]
@@ -52,13 +58,13 @@ mod tests {
         let answer = factory.generate_from_str("0123").unwrap();
 
         let guess = factory.generate_from_str("0123").unwrap();
-        assert_eq!(answer.diff(&guess), Ok(DiffResult::create(4, 0)));
+        assert_eq!(answer.diff(&guess), Ok((DiffResult::create(4, 0), true)));
 
         let guess = factory.generate_from_str("0369").unwrap();
-        assert_eq!(answer.diff(&guess), Ok(DiffResult::create(1, 1)));
+        assert_eq!(answer.diff(&guess), Ok((DiffResult::create(1, 1), false)));
 
         let guess = factory.generate_from_str("4567").unwrap();
-        assert_eq!(answer.diff(&guess), Ok(DiffResult::create(0, 0)));
+        assert_eq!(answer.diff(&guess), Ok((DiffResult::create(0, 0), false)));
 
         let guess = factory.generate_from_str("01234").unwrap();
         assert_eq!(
@@ -68,6 +74,6 @@ mod tests {
 
         let answer = factory.generate_from_str("01234567").unwrap();
         let guess = factory.generate_from_str("01234567").unwrap();
-        assert_eq!(answer.diff(&guess), Ok(DiffResult::create(8, 0)));
+        assert_eq!(answer.diff(&guess), Ok((DiffResult::create(8, 0), true)));
     }
 }
