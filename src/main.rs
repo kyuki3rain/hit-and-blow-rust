@@ -1,11 +1,10 @@
 extern crate rand;
 
-mod check_result;
-mod code;
+mod factories;
+mod models;
 
-use check_result::CheckResult;
 use clap::Parser;
-use code::Code;
+use factories::CodeFactory;
 use std::io;
 use std::io::Write;
 
@@ -15,19 +14,22 @@ struct Args {
     /// Number of length of code
     #[arg(short, long, default_value_t = 4)]
     length: usize,
+    /// Number of radix [10, 16]
+    #[arg(short, long, default_value_t = 10)]
+    radix: u8,
 }
 
 fn main() {
     let args = Args::parse();
-
-    let answer = match Code::from_rand(args.length) {
-        Ok(code) => code,
+    let factory = match CodeFactory::try_from(args.radix) {
+        Ok(factory) => factory,
         Err(e) => {
             println!("{}", e);
             return;
         }
     };
 
+    let answer = factory.generate(args.length);
     let mut counter = 0;
 
     loop {
@@ -39,7 +41,7 @@ fn main() {
             .read_line(&mut guess)
             .expect("入力エラー。read_line()で失敗しました。");
 
-        let guess = match Code::from_string(guess) {
+        let guess = match factory.generate_from_str(&guess) {
             Ok(guess) => guess,
             Err(e) => {
                 println!("{}\nもう一度入力してください。", e);
@@ -47,7 +49,7 @@ fn main() {
             }
         };
 
-        let result = match CheckResult::check(&answer, &guess) {
+        let result = match answer.diff(&guess) {
             Ok(result) => result,
             Err(e) => {
                 println!("{}\nもう一度入力してください。", e);
