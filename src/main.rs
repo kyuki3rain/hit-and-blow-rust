@@ -14,6 +14,7 @@ struct Args {
     /// Number of length of code
     #[arg(short, long, default_value_t = 4)]
     length: usize,
+    /// Number of radix [10, 16]
     #[arg(short, long, default_value_t = 10)]
     radix: u8,
 }
