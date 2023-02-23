@@ -1,4 +1,4 @@
-use super::Code;
+use crate::models::Code;
 
 pub enum CodeFactory {
     Hex,
@@ -43,7 +43,9 @@ impl CodeFactory {
 mod tests {
     use std::collections::{HashMap, HashSet};
 
-    use crate::code::{code_factory::CodeFactory, Code};
+    use crate::models::Code;
+
+    use super::CodeFactory;
 
     #[test]
     fn generate() {
