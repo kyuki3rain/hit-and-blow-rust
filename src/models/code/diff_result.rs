@@ -42,17 +42,17 @@ mod tests {
     #[test]
     fn hit() {
         let mut result = DiffResult::new();
-        assert_eq!(!result.hit, 0);
+        assert_eq!(result.hit, 0);
         result.hit();
-        assert_eq!(!result.hit, 1);
+        assert_eq!(result.hit, 1);
     }
 
     #[test]
     fn blow() {
         let mut result = DiffResult::new();
-        assert_eq!(!result.blow, 0);
+        assert_eq!(result.blow, 0);
         result.blow();
-        assert_eq!(!result.blow, 1);
+        assert_eq!(result.blow, 1);
     }
 
     #[test]
