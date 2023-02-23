@@ -29,7 +29,6 @@ fn main() {
     };
 
     let answer = factory.generate(args.length);
-
     let mut counter = 0;
 
     loop {
@@ -41,7 +40,7 @@ fn main() {
             .read_line(&mut guess)
             .expect("入力エラー。read_line()で失敗しました。");
 
-        let guess = match factory.generate_from_string(guess) {
+        let guess = match factory.generate_from_str(&guess) {
             Ok(guess) => guess,
             Err(e) => {
                 println!("{}\nもう一度入力してください。", e);

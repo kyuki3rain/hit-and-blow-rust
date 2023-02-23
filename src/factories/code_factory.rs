@@ -1,3 +1,7 @@
+use std::collections::HashMap;
+
+use rand::seq::SliceRandom;
+
 use crate::models::Code;
 
 pub enum CodeFactory {
@@ -24,11 +28,50 @@ impl TryFrom<u8> for CodeFactory {
 
 impl CodeFactory {
     pub fn generate(&self, len: usize) -> Code {
-        Code::from_size(len, self.to_radix())
+        match self {
+            Self::Hex | Self::Dec => {
+                let mut rng = rand::thread_rng();
+                let choices: Vec<u8> = (0..(self.to_radix() as u8)).collect();
+
+                let code = HashMap::from_iter(
+                    choices
+                        .choose_multiple(&mut rng, len)
+                        .cloned()
+                        .enumerate()
+                        .map(|(i, d)| (d, i)),
+                );
+
+                Code::new(code)
+            }
+        }
     }
 
-    pub fn generate_from_string(&self, s: String) -> Result<Code, String> {
-        Code::from_string(s, self.to_radix())
+    pub fn generate_from_str(&self, s: &str) -> Result<Code, String> {
+        let mut code = HashMap::new();
+
+        match self {
+            Self::Dec | Self::Hex => {
+                for (i, c) in s.trim().chars().enumerate() {
+                    let d = match c.to_digit(self.to_radix()) {
+                        Some(d) => d as u8,
+                        None => {
+                            return Err(format!("数字として解釈できない文字があります。c={}", c))
+                        }
+                    };
+
+                    if let Some(j) = code.insert(d, i) {
+                        return Err(format!(
+                            "{}つ目と{}つ目の数字が重複しています。d={}",
+                            j + 1,
+                            i + 1,
+                            d
+                        ));
+                    }
+                }
+            }
+        }
+
+        Ok(Code::new(code))
     }
 
     fn to_radix(&self) -> u32 {
@@ -54,61 +97,61 @@ mod tests {
 
         let code = factory_dec.generate(4);
 
-        assert_eq!(code.0.len(), 4);
+        assert_eq!(code.code().len(), 4);
 
         let mut set = HashSet::new();
 
-        for (d, i) in &code.0 {
+        for (d, i) in code.code() {
             assert!(*d < 10);
             assert!(set.insert(*i));
         }
 
         let code = factory_dec.generate(8);
 
-        assert_eq!(code.0.len(), 8);
+        assert_eq!(code.code().len(), 8);
 
         let mut set = HashSet::new();
 
-        for (d, i) in &code.0 {
+        for (d, i) in code.code() {
             assert!(*d < 10);
             assert!(set.insert(*i));
         }
 
         let code = factory_hex.generate(8);
 
-        assert_eq!(code.0.len(), 8);
+        assert_eq!(code.code().len(), 8);
 
         let mut set = HashSet::new();
 
-        for (d, i) in &code.0 {
+        for (d, i) in code.code() {
             assert!(*d < 16);
             assert!(set.insert(*i));
         }
     }
 
     #[test]
-    fn generate_from_string() {
+    fn generate_from_str() {
         let factory_dec = CodeFactory::try_from(10).unwrap();
         let factory_hex = CodeFactory::try_from(16).unwrap();
 
         assert_eq!(
-            factory_dec.generate_from_string("0123".to_string()),
-            Ok(Code(HashMap::from([(0, 0), (1, 1), (2, 2), (3, 3)])))
+            factory_dec.generate_from_str("0123"),
+            Ok(Code::new(HashMap::from([(0, 0), (1, 1), (2, 2), (3, 3)])))
         );
 
         assert_eq!(
-            factory_dec.generate_from_string("0012".to_string()),
+            factory_dec.generate_from_str("0012"),
             Err("1つ目と2つ目の数字が重複しています。d=0".to_string())
         );
 
         assert_eq!(
-            factory_dec.generate_from_string("01a3".to_string()),
+            factory_dec.generate_from_str("01a3"),
             Err("数字として解釈できない文字があります。c=a".to_string())
         );
 
         assert_eq!(
-            factory_hex.generate_from_string("01a3".to_string()),
-            Ok(Code(HashMap::from([(0, 0), (1, 1), (0xa, 2), (3, 3)])))
+            factory_hex.generate_from_str("01a3"),
+            Ok(Code::new(HashMap::from([(0, 0), (1, 1), (0xa, 2), (3, 3)])))
         );
     }
 }
