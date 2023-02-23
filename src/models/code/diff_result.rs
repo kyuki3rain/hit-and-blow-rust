@@ -2,8 +2,8 @@ use std::fmt;
 
 #[derive(Debug, PartialEq, Eq)]
 pub struct DiffResult {
-    pub hit: usize,
-    pub blow: usize,
+    hit: usize,
+    blow: usize,
 }
 
 impl DiffResult {
@@ -22,6 +22,11 @@ impl DiffResult {
     pub fn correct(&self, len: usize) -> bool {
         self.hit == len && self.blow == 0
     }
+
+    #[cfg(test)]
+    pub fn create(hit: usize, blow: usize) -> Self {
+        Self { hit, blow }
+    }
 }
 
 impl fmt::Display for DiffResult {
@@ -35,8 +40,24 @@ mod tests {
     use super::DiffResult;
 
     #[test]
+    fn hit() {
+        let mut result = DiffResult::new();
+        assert_eq!(!result.hit, 0);
+        result.hit();
+        assert_eq!(!result.hit, 1);
+    }
+
+    #[test]
+    fn blow() {
+        let mut result = DiffResult::new();
+        assert_eq!(!result.blow, 0);
+        result.blow();
+        assert_eq!(!result.blow, 1);
+    }
+
+    #[test]
     fn correct() {
-        let result = DiffResult { hit: 4, blow: 0 };
+        let result = DiffResult::create(4, 0);
         assert!(result.correct(4));
 
         let result = DiffResult { hit: 1, blow: 0 };

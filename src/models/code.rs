@@ -11,11 +11,6 @@ impl Code {
         Self(init)
     }
 
-    #[cfg(test)]
-    pub fn code(&self) -> &HashMap<u8, usize> {
-        &self.0
-    }
-
     pub fn diff(&self, guess: &Code) -> Result<DiffResult, String> {
         if self.0.len() != guess.0.len() {
             return Err(format!(
@@ -39,6 +34,11 @@ impl Code {
 
         Ok(result)
     }
+
+    #[cfg(test)]
+    pub fn code(&self) -> &HashMap<u8, usize> {
+        &self.0
+    }
 }
 
 #[cfg(test)]
@@ -52,13 +52,13 @@ mod tests {
         let answer = factory.generate_from_str("0123").unwrap();
 
         let guess = factory.generate_from_str("0123").unwrap();
-        assert_eq!(answer.diff(&guess), Ok(DiffResult { hit: 4, blow: 0 }));
+        assert_eq!(answer.diff(&guess), Ok(DiffResult::create(4, 0)));
 
         let guess = factory.generate_from_str("0369").unwrap();
-        assert_eq!(answer.diff(&guess), Ok(DiffResult { hit: 1, blow: 1 }));
+        assert_eq!(answer.diff(&guess), Ok(DiffResult::create(1, 1)));
 
         let guess = factory.generate_from_str("4567").unwrap();
-        assert_eq!(answer.diff(&guess), Ok(DiffResult { hit: 0, blow: 0 }));
+        assert_eq!(answer.diff(&guess), Ok(DiffResult::create(0, 0)));
 
         let guess = factory.generate_from_str("01234").unwrap();
         assert_eq!(
@@ -68,6 +68,6 @@ mod tests {
 
         let answer = factory.generate_from_str("01234567").unwrap();
         let guess = factory.generate_from_str("01234567").unwrap();
-        assert_eq!(answer.diff(&guess), Ok(DiffResult { hit: 8, blow: 0 }));
+        assert_eq!(answer.diff(&guess), Ok(DiffResult::create(8, 0)));
     }
 }
