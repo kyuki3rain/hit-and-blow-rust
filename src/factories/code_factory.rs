@@ -2,7 +2,7 @@ use std::collections::HashMap;
 
 use rand::seq::SliceRandom;
 
-use crate::models::Code;
+use crate::{libs::perm::generate_permutations, models::Code};
 
 pub enum CodeFactory {
     Hex,
@@ -72,6 +72,13 @@ impl CodeFactory {
         }
 
         Ok(Code::new(code))
+    }
+
+    pub fn generate_all(&self, len: usize) -> Vec<Code> {
+        generate_permutations(self.to_radix(), len)
+            .iter()
+            .map(|vec| Code::new(vec.iter().enumerate().map(|(i, d)| (*d, i)).collect()))
+            .collect()
     }
 
     fn to_radix(&self) -> u32 {

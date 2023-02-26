@@ -1,9 +1,9 @@
 pub mod diff_result;
 pub use diff_result::DiffResult;
 
-use std::collections::HashMap;
+use std::{collections::HashMap, fmt};
 
-#[derive(Debug, PartialEq, Eq)]
+#[derive(Debug, PartialEq, Eq, Clone)]
 pub struct Code(HashMap<u8, usize>);
 
 impl Code {
@@ -11,7 +11,7 @@ impl Code {
         Self(init)
     }
 
-    fn len(&self) -> usize {
+    pub fn len(&self) -> usize {
         self.0.len()
     }
 
@@ -44,6 +44,16 @@ impl Code {
     #[cfg(test)]
     pub fn code(&self) -> &HashMap<u8, usize> {
         &self.0
+    }
+}
+
+impl fmt::Display for Code {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        let mut vec = vec!["".to_string(); self.0.len()];
+        for (d, i) in self.0.iter() {
+            vec[*i] = (*d).to_string();
+        }
+        write!(f, "{}", vec.join(""))
     }
 }
 

@@ -1,6 +1,8 @@
 extern crate rand;
 
 mod factories;
+mod features;
+mod libs;
 mod models;
 
 use clap::Parser;
@@ -8,15 +10,23 @@ use factories::CodeFactory;
 use std::io;
 use std::io::Write;
 
+use crate::features::calculator::calculator;
+use crate::models::Log;
+
 #[derive(Parser, Debug)]
 #[command(author, version, about, long_about = None)]
 struct Args {
     /// Number of length of code
     #[arg(short, long, default_value_t = 4)]
     length: usize,
+
     /// Number of radix [10, 16]
     #[arg(short, long, default_value_t = 10)]
     radix: u8,
+
+    /// Number of radix [10, 16]
+    #[arg(short, long, default_value_t = false)]
+    calc: bool,
 }
 
 fn main() {
@@ -27,6 +37,12 @@ fn main() {
             println!("{}", e);
             return;
         }
+    };
+
+    let mut patterns = if args.calc {
+        factory.generate_all(args.length)
+    } else {
+        vec![]
     };
 
     let answer = factory.generate(args.length);
@@ -57,8 +73,25 @@ fn main() {
             }
         };
 
+        let log = Log { guess, result };
+
         counter += 1;
-        println!("{}", result);
+        println!("{}", log.result);
+
+        if args.calc {
+            patterns = calculator(patterns, &log);
+
+            println!("counts: {}", patterns.len());
+
+            print!("possibilities: ");
+            for code in patterns.get(0..5).unwrap_or(&patterns) {
+                print!("{}, ", code);
+            }
+            if patterns.len() > 5 {
+                print!(" etc...");
+            }
+            println!();
+        }
 
         if is_correct {
             println!("Congratulations!");
