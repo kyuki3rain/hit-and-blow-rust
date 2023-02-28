@@ -74,6 +74,7 @@ impl CodeFactory {
         Ok(Code::new(code))
     }
 
+    // 返還は２度手間だけど、せっかくChatGPTちゃんが作ってくれたlibなので残しちゃった
     pub fn generate_all(&self, len: usize) -> Vec<Code> {
         generate_permutations(self.to_radix(), len)
             .iter()
