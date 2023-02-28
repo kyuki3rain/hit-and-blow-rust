@@ -7,6 +7,7 @@ mod models;
 
 use clap::Parser;
 use factories::CodeFactory;
+use models::Possibility;
 use std::io;
 use std::io::Write;
 
@@ -39,10 +40,10 @@ fn main() {
         }
     };
 
-    let mut patterns = if args.calc {
-        factory.generate_all(args.length)
+    let mut possibility: Possibility = if args.calc {
+        factory.generate_all(args.length).into()
     } else {
-        vec![]
+        Possibility::new()
     };
 
     let answer = factory.generate(args.length);
@@ -79,18 +80,8 @@ fn main() {
         println!("{}", log.result);
 
         if args.calc {
-            patterns = calculator(patterns, &log);
-
-            println!("counts: {}", patterns.len());
-
-            print!("possibilities: ");
-            for code in patterns.get(0..5).unwrap_or(&patterns) {
-                print!("{}, ", code);
-            }
-            if patterns.len() > 5 {
-                print!(" etc...");
-            }
-            println!();
+            possibility = calculator(possibility, &log);
+            println!("{}", possibility);
         }
 
         if is_correct {

@@ -1,7 +1,7 @@
-use crate::models::{Code, Log};
+use crate::models::{Log, Possibility};
 
-pub fn calculator(prev: Vec<Code>, log: &Log) -> Vec<Code> {
-    let mut calc_result: Vec<Code> = vec![];
+pub fn calculator(prev: Possibility, log: &Log) -> Possibility {
+    let mut calc_result = Possibility::new();
 
     for code in prev {
         if let Ok((result, _)) = code.diff(&log.guess) {
