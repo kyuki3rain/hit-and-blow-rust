@@ -5,14 +5,13 @@ mod features;
 mod libs;
 mod models;
 
+use std::io::{self, Write};
+
 use clap::Parser;
 use factories::CodeFactory;
 use models::Possibility;
-use std::io;
-use std::io::Write;
 
-use crate::features::calculator::calculator;
-use crate::models::Log;
+use crate::features::guess::guess;
 
 #[derive(Parser, Debug)]
 #[command(author, version, about, long_about = None)]
@@ -27,7 +26,7 @@ struct Args {
 
     /// Number of radix [10, 16]
     #[arg(short, long, default_value_t = false)]
-    calc: bool,
+    possibility: bool,
 }
 
 fn main() {
@@ -40,7 +39,7 @@ fn main() {
         }
     };
 
-    let mut possibility: Possibility = if args.calc {
+    let mut possibility: Possibility = if args.possibility {
         factory.generate_all(args.length).into()
     } else {
         Possibility::new()
@@ -53,34 +52,19 @@ fn main() {
         print!("{}桁の数字を入力してください: ", args.length);
         io::stdout().flush().unwrap();
 
-        let mut guess = String::new();
-        io::stdin()
-            .read_line(&mut guess)
-            .expect("入力エラー。read_line()で失敗しました。");
-
-        let guess = match factory.generate_from_str(&guess) {
-            Ok(guess) => guess,
+        let (log, is_correct) = match guess(&factory, &answer) {
+            Ok(r) => r,
             Err(e) => {
                 println!("{}\nもう一度入力してください。", e);
                 continue;
             }
         };
-
-        let (result, is_correct) = match answer.diff(&guess) {
-            Ok(d) => d,
-            Err(e) => {
-                println!("{}\nもう一度入力してください。", e);
-                continue;
-            }
-        };
-
-        let log = Log { guess, result };
 
         counter += 1;
-        println!("{}", log.result);
+        println!("{}", log);
 
-        if args.calc {
-            possibility = calculator(possibility, &log);
+        if args.possibility {
+            possibility.update(&log);
             println!("{}", possibility);
         }
 

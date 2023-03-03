@@ -1,17 +1,8 @@
 use std::fmt;
 
-use super::Code;
+use super::{Code, Log};
 
 pub struct Possibility(Vec<Code>);
-
-impl IntoIterator for Possibility {
-    type Item = Code;
-    type IntoIter = std::vec::IntoIter<Code>;
-
-    fn into_iter(self) -> Self::IntoIter {
-        self.0.into_iter()
-    }
-}
 
 impl From<Vec<Code>> for Possibility {
     fn from(value: Vec<Code>) -> Self {
@@ -21,11 +12,17 @@ impl From<Vec<Code>> for Possibility {
 
 impl Possibility {
     pub fn new() -> Self {
-        Self(vec![])
+        vec![].into()
     }
 
-    pub fn push(&mut self, code: Code) {
-        self.0.push(code)
+    pub fn update(&mut self, log: &Log) {
+        self.0.retain(|code| {
+            if let Ok((result, _)) = code.diff(&log.guess) {
+                result == log.result
+            } else {
+                false
+            }
+        });
     }
 }
 
