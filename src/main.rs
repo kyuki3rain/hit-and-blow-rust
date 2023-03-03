@@ -15,15 +15,15 @@ use crate::models::Log;
 #[derive(Parser, Debug)]
 #[command(author, version, about, long_about = None)]
 struct Args {
-    /// Number of length of code
+    /// Number of length of code: unsigned int
     #[arg(short, long, default_value_t = 4)]
     length: usize,
 
-    /// Number of radix [10, 16]
+    /// Number of radix: [10, 16]
     #[arg(short, long, default_value_t = 10)]
     radix: u8,
 
-    /// Number of radix [10, 16]
+    /// calc possibility: [true, false]
     #[arg(short, long, default_value_t = false)]
     possibility: bool,
 }
