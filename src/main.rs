@@ -1,22 +1,31 @@
 extern crate rand;
 
 mod factories;
+mod libs;
 mod models;
+
+use std::io::{self, Write};
 
 use clap::Parser;
 use factories::CodeFactory;
-use std::io;
-use std::io::Write;
+use models::Possibility;
+
+use crate::models::Log;
 
 #[derive(Parser, Debug)]
 #[command(author, version, about, long_about = None)]
 struct Args {
-    /// Number of length of code
+    /// Number of length of code: unsigned int
     #[arg(short, long, default_value_t = 4)]
     length: usize,
-    /// Number of radix [10, 16]
+
+    /// Number of radix: [10, 16]
     #[arg(short, long, default_value_t = 10)]
     radix: u8,
+
+    /// calc possibility: [true, false]
+    #[arg(short, long, default_value_t = false)]
+    possibility: bool,
 }
 
 fn main() {
@@ -27,6 +36,12 @@ fn main() {
             println!("{}", e);
             return;
         }
+    };
+
+    let mut possibility: Possibility = if args.possibility {
+        factory.generate_all(args.length).into()
+    } else {
+        Possibility::new()
     };
 
     let answer = factory.generate(args.length);
@@ -57,8 +72,15 @@ fn main() {
             }
         };
 
+        let log = Log { guess, result };
+
         counter += 1;
-        println!("{}", result);
+        println!("{}", log);
+
+        if args.possibility {
+            possibility.update(&log);
+            println!("{}", possibility);
+        }
 
         if is_correct {
             println!("Congratulations!");
